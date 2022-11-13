@@ -1,0 +1,28 @@
+{
+  "name": "lit-leaflet",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/lit-leaflet.es.js",
+  "exports": {
+    ".": "./dist/lit-leaflet.es.js"
+  },
+  "types": "types/",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.2",
+    "lit": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
+  }
+}
