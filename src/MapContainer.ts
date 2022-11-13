@@ -1,6 +1,6 @@
 import { LitElement, css, html, PropertyValues } from 'lit'
-import {Map, tileLayer, Marker, Icon} from 'leaflet';
 import { customElement, property } from 'lit/decorators.js'
+import {Map, tileLayer, Marker, Icon} from 'leaflet';
 
 export interface MarkerInformation {
   title: string;
@@ -22,7 +22,7 @@ export class MapContainer extends LitElement{
   defaultZoom = 10;
 
   @property({type: Array<MarkerInformation>})
-  markers = [{'title': 'Test', 'text': '123 ...',  'latitude': 9.5, 'longitude': 51.3},{'title': 'Test', 'text': '123 ...', 'latitude': 9.5, 'longitude': 51.5}];
+  markers = [];
 
   private mapMarkers: Array<Marker> = [];
 
@@ -116,3 +116,12 @@ constructor() {
 
 }
 
+declare global {
+
+  interface HTMLElementTagNameMap {
+
+    "my-map": MapContainer;
+
+  }
+
+}
