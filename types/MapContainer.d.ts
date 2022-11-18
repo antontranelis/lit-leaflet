@@ -1,21 +1,28 @@
 import { LitElement, PropertyValues } from 'lit';
 import { Map } from 'leaflet';
-export interface MarkerInformation {
-    title: string;
+import { Point } from 'geojson';
+export interface Item {
+    id: number;
+    name: string;
     text: string;
-    latitude: number;
-    longitude: number;
+    position: Point;
+    start?: string;
+    end?: string;
+    tags?: number[];
+    date_created?: string;
+    date_updated?: string;
+}
+export interface Tag {
+    id: number;
+    name: string;
+    color: string;
 }
 export declare class MapContainer extends LitElement {
     latitude: number;
     longitude: number;
     defaultZoom: number;
-    markers: {
-        title: string;
-        text: string;
-        latitude: number;
-        longitude: number;
-    }[];
+    items: Item[];
+    _marker: NodeListOf<LitElement>;
     private mapMarkers;
     private _map;
     private markerRed;
@@ -26,4 +33,9 @@ export declare class MapContainer extends LitElement {
     updated(_changedProperties: PropertyValues): void;
     _updateMarkers(): void;
     _hasValidMapData(): 0 | Map;
+}
+declare global {
+    interface HTMLElementTagNameMap {
+        "map-container": MapContainer;
+    }
 }
