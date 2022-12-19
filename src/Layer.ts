@@ -1,20 +1,36 @@
-import { LitElement, } from 'lit'
+import { LitElement, PropertyValueMap } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { Item } from './Item';
 
 
-@customElement('layer')
+@customElement('map-layer')
 export class Layer extends LitElement {
 
-  @property({ type: Number })
-  latitude: number = 47.38991;
+  @property({ type: String })
+  name: string = "";
 
-  @property({ type: Number })
-  longitude: number = 8.51604;
+  @property({ type: String })
+  color: string = "#777";
+
+  @property({ type: String })
+  shape: string = "circle";
+
+  @property({ type: String })
+  icon: string = "circle-solid";
+
+
+  @property({ type: Array<Item> })
+  items: Item[] = [];
+
+  protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    const event = new Event('child-connected', { bubbles: true, composed: true });
+    this.dispatchEvent(event);
+  }
 
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "layer": Layer;
+    "map-layer": Layer;
   }
 }

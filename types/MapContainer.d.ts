@@ -1,6 +1,7 @@
-import { LitElement, PropertyValues } from 'lit';
-import { Map } from 'leaflet';
+import { LitElement } from 'lit';
+import { Map as leafletMap } from 'leaflet';
 import { Point } from 'geojson';
+import { Marker } from './Marker';
 export interface Item {
     id: number;
     name: string;
@@ -22,17 +23,15 @@ export declare class MapContainer extends LitElement {
     longitude: number;
     defaultZoom: number;
     items: Item[];
-    _marker: NodeListOf<LitElement>;
-    private mapMarkers;
+    _marker: Marker[];
     private _map;
     private markerRed;
     static styles: import("lit").CSSResult;
     constructor();
     firstUpdated(): void;
     render(): import("lit-html").TemplateResult<1>;
-    updated(_changedProperties: PropertyValues): void;
-    _updateMarkers(): void;
-    _hasValidMapData(): 0 | Map;
+    _renderMap(): void;
+    _hasValidMapData(): 0 | leafletMap;
 }
 declare global {
     interface HTMLElementTagNameMap {

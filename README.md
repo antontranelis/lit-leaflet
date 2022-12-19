@@ -18,7 +18,7 @@ run dev server
 
 ```html
     <map latitude="51.3" longitude="9.5" defaultZoom ="10">
-        <layer name="places">
+        <layer id="places">
             <menu symbol="pointer" color="#777" text="add new place"></menu>
             <icon shape="circle" default-color="#777" symbol="circle"></icon>
             <popup template="places"></popup>

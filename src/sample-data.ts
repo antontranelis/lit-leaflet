@@ -1,4 +1,5 @@
-import {Item, Tag} from "./MapContainer"
+import {Tag} from "./MapContainer"
+import { EventItem, Item } from "./Item";
 
 export const tags : Tag[] = [
   {
@@ -53,7 +54,7 @@ export const tags : Tag[] = [
   }
 ]
 
-export const events : Item[] = [
+export const events : EventItem[] = [
 
   {
       "id": 243,
@@ -80,7 +81,7 @@ export const events : Item[] = [
         "type": "Point",
         "coordinates": [
             9.67,
-            50.589
+            51.5
         ]
     },
     "start": "2022-03-18T12:00:00",

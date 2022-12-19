@@ -17,11 +17,15 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "leaflet": "^1.9.2",
+    "leaflet": "^1.9.3",
+    "leaflet.markercluster": "^1.5.3",
+    "leaflet.markercluster.layersupport": "^2.0.1",
     "lit": "^2.4.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.0",
+    "@types/leaflet.markercluster": "^1.5.1",
+    "@types/leaflet.markercluster.layersupport": "^1.0.2",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
   }

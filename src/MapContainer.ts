@@ -1,20 +1,18 @@
-import { LitElement, css, html, PropertyValues, PropertyValueMap } from 'lit'
-import { customElement, property, queryAssignedElements, state } from 'lit/decorators.js'
-import { Map as leafletMap, tileLayer, Marker as leafletMarker, Icon } from 'leaflet';
-import { Point } from 'geojson'
+import { LitElement,  html, CSSResult } from 'lit'
+import {MapStyles} from './styles'
+import { customElement, property, queryAssignedElements } from 'lit/decorators.js'
+import { Map as leafletMap, tileLayer, Marker as leafletMarker, LayerGroup, Control, MarkerClusterGroup } from 'leaflet';
 import { Marker } from './Marker';
+import { Layer } from './Layer';
+import { Tags } from './Tags';
+import MarkerIconFactory from './Utils/MarkerIconFactory'
+import { getItemPopup, Item } from './Item';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster.layersupport';
 
-export interface Item {
-  id: number;
-  name: string;
-  text: string;
-  position: Point;
-  start?: string;
-  end?: string;
-  tags?: number[];
-  date_created?: string;
-  date_updated?: string;
-}
+
+
+
 
 export interface Tag {
   id: number;
@@ -37,110 +35,114 @@ export class MapContainer extends LitElement {
   @property({ type: Array<Item> })
   items: Item[] = [];
 
-  @queryAssignedElements({ selector: 'map-marker'})
-  _marker!: Marker[]
+  @queryAssignedElements({ selector: 'map-marker' })
+  marker!: Marker[];
 
+  @queryAssignedElements({ selector: 'map-layer'})
+  layers!: Layer[];
 
-  @state()
-  private mapMarkers: Array<leafletMarker> = [];
+  @queryAssignedElements({ selector: 'map-tags' })
+  private _tags_childs!: Tags[];
+
+  tags!: Tags;
 
   private _map!: leafletMap;
+  private _layerControl!: Control.Layers;
+  private _layers: Control.LayersObject;
+  private _mcgLayerSupportGroup!: MarkerClusterGroup.LayerSupport;
 
-  private markerRed: Icon;
+  static styles: CSSResult[] = [
+    // language=CSS
+    MapStyles];
 
-  static styles = css`
-  :host {
-    display:block;
-    height: 100vh;
-    width: 100%
-  }
-`
 
   constructor() {
     super();
-
-    this.markerRed = new Icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41],
-    });
+    this._layers = {} as Control.LayersObject;
   }
 
-  firstUpdated() {
-    console.log("firstUpdated");
-    
-    console.log(this._marker);
 
+
+  firstUpdated() {
     const mapEl = this.renderRoot.querySelector('#mapid') as HTMLElement;
     if (!mapEl) return;
     this._map = new leafletMap(mapEl).setView([this.latitude, this.longitude], this.defaultZoom);
-
     let urlTemplate = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png';
     this._map.addLayer(tileLayer(urlTemplate, { minZoom: 4 }))
+    this._layerControl = new Control.Layers({}, {}, { collapsed: false, position: 'bottomleft' }).addTo(this._map);
+    this._mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({maxClusterRadius: 50,singleAddRemoveBufferDuration:0});
+    this._map.addLayer(this._mcgLayerSupportGroup)
+    this.tags = this._tags_childs[0];
+
   }
+
+
 
   // @marker-added is catching added marker events from child elements of type Marker
   render() {
     return html`
           <link rel="stylesheet" href="https://cdn.skypack.dev/leaflet/dist/leaflet.css">
-          <div @marker-added=${this._updateMarkers} id="mapid" style="height: 100%">
+          <div @slotchange=${this._renderMap} @child-connected=${this._renderMap} id="mapid" style="height: 100%">
             <slot></slot>
           </div>
       `;
   }
 
+  _renderMap() {
 
 
-  _updateMarkers() {
-    if (!this._hasValidMapData()) {
-      return;
-    }
-  /*
-    // Remove existing markers
-    this.mapMarkers.forEach(marker => marker.remove());
-    this.mapMarkers = [];
+    this._mcgLayerSupportGroup.clearLayers();
 
-  
-    // Add new markers for each marker from the custom element property
-    this.mapMarkers = this.items.map(item => {
-      const { name, text, position } = item;
+    this.layers.map(layer => {
+      if (layer.name !== undefined && layer.items) {
+        const layerGroup = new LayerGroup;
+        layer.items.map(item => {
+          console.log(item.name);
+          
+          const color1 =   item.tags && item.tags.length>0 && this.tags.tagMap.size>0? this.tags.getItemTags(item)[0].color : layer.color;          
+          const marker = new leafletMarker([item.position.coordinates[1], item.position.coordinates[0]], { icon: MarkerIconFactory(layer.shape, color1, 'rgba(88,88,88,0.22)', layer.icon) }).addTo(layerGroup);
+          marker.bindPopup(getItemPopup(item , this.tags.getItemTags(item)))
+        })
 
-      const mapMarker = new leafletMarker([position.coordinates[1], position.coordinates[0]], { icon: this.markerRed }).addTo(this._map);
-      if (name || text) {
-        const template = `<div part="popup" class="popup">
-          ${name ? `<h3 part="popup-title" class="popup-title">${name}</h3>` : ''}
-          ${text ? `<span part="popup-title" class="popup-title">${text}</span>` : ''}
-        </div>`;
+        // add / update layer
+        if (this._layers[layer.name]) {
+          this._layers[layer.name].remove();
+        }
+        this._layers[layer.name] = layerGroup;
+        this._mcgLayerSupportGroup.checkIn(layerGroup);
+        layerGroup.addTo(this._map);
 
-        mapMarker.bindPopup(template);
+
+        //update Layer Control
+        this._layerControl.remove();
+        this._layerControl = new Control.Layers({}, this._layers, { collapsed: false, position: 'bottomleft' }).addTo(this._map);
       }
-*/
 
-      this._marker.map(marker => {
-      
+    })
+
+
+    //  console.log(this._marker);
+
+    this.marker.map(marker => {
+
       let mapMarker = null;
       if (marker.latitude && marker.longitude)
-      mapMarker = new leafletMarker([marker.latitude, marker.longitude], { icon: this.markerRed }).addTo(this._map);
+
+        mapMarker = new leafletMarker([marker.latitude, marker.longitude], { icon: MarkerIconFactory("star", '#444e99', '#777', "circle-solid") }).addTo(this._map);
+
       if (marker.innerHTML) {
         const template = `<div part="popup" class="popup">
             ${marker.innerHTML}
           </div>`;
-          if(mapMarker)
-        mapMarker.bindPopup(template);
+        if (mapMarker)
+          mapMarker.bindPopup(template);
 
         return mapMarker;
       }
-      });
+    });
   }
-
-  _hasValidMapData() {
-    return this.latitude && this.longitude && this._map;
-  }
-
 }
+
 
 declare global {
   interface HTMLElementTagNameMap {

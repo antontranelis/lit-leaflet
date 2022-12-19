@@ -14,12 +14,13 @@ export class Marker extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
     console.log("connected Callback Marker");
-
-    const event = new Event('marker-added', {bubbles: true, composed: true});
-    this.dispatchEvent(event);
     
+    const event = new Event('child-connected', {bubbles: true, composed: true});
+    this.dispatchEvent(event);
   }
 
+
+  
 }
 
 
