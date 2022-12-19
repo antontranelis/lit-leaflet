@@ -17,17 +17,21 @@ run dev server
 ## API
 
 ```html
-    <map latitude="51.3" longitude="9.5" defaultZoom ="10">
-        <layer id="places">
-            <menu symbol="pointer" color="#777" text="add new place"></menu>
-            <icon shape="circle" default-color="#777" symbol="circle"></icon>
-            <popup template="places"></popup>
-        </layer>
-        <tags></tags>
-    </map>
-    <script async type="module">
-        import {placesData} from './src/sample-data.ts'
-        let layerPlaces = document.querySelector( '#places' )
-        layerPlaces.items = placesData;
-    </script>
+    <map-container latitude="51.3" longitude="9.5" defaultZoom ="10">
+      <map-tags id="tags"></map-tags>
+      <map-layer id="places-layer" name="places" color="#777" shape="circle"></map-layer>
+      <map-layer id="events-layer" name="events" color="#777" shape="square" icon="calendar-days-solid"></map-layer>
+    </map-container>
+  <script async type="module">
+    import {places,events,tags} from './src/sample-data.ts'
+    //set places
+    let layerPlaces = document.querySelector( '#places-layer' )
+    layerPlaces.items = places;
+    //set events
+    let layerEvents = document.querySelector( '#events-layer' )
+    layerEvents.items = events;
+    //set tags
+    let tagsElement = document.querySelector( '#tags' )
+    tagsElement.data = tags;
+  </script>
 ```
